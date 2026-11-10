@@ -406,34 +406,49 @@ h1 span {
 
 <!-- META SUBSCRIBE TRACKING -->
 <script>
+const TELEGRAM_URL = "https://t.me/+ZfKKuRIcapwzYjA1";
+let redirected = false;
+let remainingSeconds = 5;
+let countdownTimer;
+
+function redirectToTelegram() {
+    if (redirected) return;
+    redirected = true;
+    window.location.href = TELEGRAM_URL;
+}
+
 function trackSubscribe(event) {
-
     event.preventDefault();
+    clearInterval(countdownTimer);
 
-    const telegramURL = event.currentTarget.href;
-    let redirected = false;
+    if (redirected) return;
+    redirected = true;
 
-    function redirectToTelegram() {
-        if (redirected) return;
-        redirected = true;
-        window.location.href = telegramURL;
+    if (typeof fbq === "function") {
+        fbq("track", "Subscribe", {
+            value: 1.00,
+            currency: "INR"
+        });
+        setTimeout(function () {
+            window.location.href = TELEGRAM_URL;
+        }, 300);
+    } else {
+        window.location.href = TELEGRAM_URL;
+    }
+}
+
+const countdownElement = document.getElementById("countdown");
+countdownTimer = setInterval(function () {
+    remainingSeconds--;
+    if (countdownElement) {
+        countdownElement.textContent = remainingSeconds;
     }
 
-    if (typeof fbq === 'function') {
-
-        fbq('track', 'Subscribe', {
-            value: 1.00,
-            currency: 'INR'
-        });
-
-        setTimeout(redirectToTelegram, 300);
-
-    } else {
+    if (remainingSeconds <= 0) {
+        clearInterval(countdownTimer);
         redirectToTelegram();
     }
-
-    setTimeout(redirectToTelegram, 1500);
-}
+}, 1000);
 </script>
 
 </body>
